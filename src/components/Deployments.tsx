@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
+import DeploymentTable from "./DeploymentTable";
 
-interface Deployment {
+export interface Deployment {
     app: string;
     env: string;
     status: string;
     timestamp: string;
     triggeredBy: string;
-  }
+}
 
   
 const Deployments = () => {
@@ -82,6 +83,7 @@ const Deployments = () => {
         setAppNameCheckedOptions([]);
         setEnvCheckedOptions([]);
         setFiltersApplied(false);
+        setIsFilterClicked(false);
     };
 
     const isChecked = (value: string) => {
@@ -139,28 +141,7 @@ const Deployments = () => {
                 </form>
             }
             {filtersApplied && <button onClick={handleClearFilters}>Clear Filters</button>}
-            <table>
-            <thead>
-            <tr>
-                <th>App Name</th>
-                <th>Environment</th>
-                <th>Status</th>
-                <th>Time</th>
-                <th>Triggered By</th>
-            </tr>
-            </thead>
-            <tbody>
-            {deployments.map((deployment) => (
-            <tr key={`${deployment.app}-${deployment.timestamp}`}>
-                <th scope="row">{deployment.app}</th>
-                <td>{deployment.env}</td>
-                <td>{deployment.status}</td>
-                <td>{deployment.timestamp}</td>
-                <td>{deployment.triggeredBy}</td>
-            </tr>
-        ))}
-            </tbody>
-        </table>
+            <DeploymentTable deployments={deployments} />
         </>
     )
 }
