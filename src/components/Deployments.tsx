@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import DeploymentTable from "./DeploymentTable";
+import DeploymentTable from "./DeploymentTable/DeploymentTable";
 import { Filter } from "./Filter";
 
 export interface Deployment {

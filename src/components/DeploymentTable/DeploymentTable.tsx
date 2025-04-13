@@ -1,12 +1,13 @@
-import { Deployment } from "./Deployments"
+import { Deployment } from "../Deployments"
+import "./DeploymentTable.css"
 
 interface DeploymentTableProps {
     deployments: Deployment[]
 }
 
 const DeploymentTable = ({ deployments }: DeploymentTableProps) => (
-    <table>
-        <thead>
+    <table className="deployment-table">
+        <thead className="deployment-header">
             <tr>
                 <th>App Name</th>
                 <th>Environment</th>
@@ -15,9 +16,9 @@ const DeploymentTable = ({ deployments }: DeploymentTableProps) => (
                 <th>Triggered By</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody className="deployment-body">
             {deployments.map((deployment) => (
-                <tr key={`${deployment.app}-${deployment.timestamp}`}>
+                <tr key={`${deployment.app}-${deployment.timestamp}`} className={`status-${deployment.status}`}>
                     <th scope="row">{deployment.app}</th>
                     <td>{deployment.env}</td>
                     <td>{deployment.status}</td>

@@ -1,0 +1,26 @@
+.deployment-table {
+    margin: auto;
+    border-collapse: collapse;
+    width: 100%;
+    max-width: 745px;
+  }
+  
+  .deployment-header th,
+  .deployment-body th,
+  .deployment-body td {
+    padding: 12px;
+    border: 1px solid black;
+    text-align: left;
+  }
+
+  .status-success {
+    background-color: #A5D6A7;
+  }
+
+  .status-pending {
+    background-color: #FFF59D;
+  }
+
+  .status-failed {
+    background-color: #EF9A9A;
+  }
