@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import DeploymentTable from "./DeploymentTable";
+import { Filter } from "./Filter";
 
 export interface Deployment {
     app: string;
@@ -91,9 +92,6 @@ const Deployments = () => {
         return filtersApplied.includes(value);
     }
 
-    const appNames = ['Payments', 'Checkout', 'Users', 'Business'];
-    const envs = ['production', 'qa', 'develop'];
-
     return (
         <>
             <button
@@ -102,43 +100,12 @@ const Deployments = () => {
                 Filter
             </button>
             {isFilterClicked && 
-                <form onSubmit={handleFilterChanges}>
-                    <fieldset>
-                    <legend>By App:</legend>
-                    {appNames.map((appName) => (
-                        <>
-                            <label>
-                                <input
-                                    key={appName}
-                                    type='checkbox'
-                                    value={appName}
-                                    checked={isChecked(appName)}
-                                    onChange={handleAppNameCheckboxChange}
-                                />
-                                {appName}
-                            </label>
-                        </>
-                    ))}
-                    </fieldset>
-                    <fieldset>
-                    <legend>By Env:</legend>
-                    {envs.map((env) => (
-                        <>
-                            <label>
-                                <input
-                                    key={env}
-                                    type='checkbox'
-                                    value={env}
-                                    checked={isChecked(env)}
-                                    onChange={handleEnvCheckboxChange}
-                                />
-                                    {env}
-                                </label>
-                        </>
-                    ))}
-                    </fieldset>
-                    <button>Apply Changes</button>
-                </form>
+                <Filter
+                    handleFilterChanges={handleFilterChanges}
+                    isChecked={isChecked}
+                    handleAppNameCheckboxChange={handleAppNameCheckboxChange}
+                    handleEnvCheckboxChange={handleEnvCheckboxChange}
+                />
             }
             {filtersApplied && <button onClick={handleClearFilters}>Clear Filters</button>}
             <DeploymentTable deployments={deployments} />
