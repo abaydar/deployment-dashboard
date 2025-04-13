@@ -13,14 +13,17 @@ export default function handler(
   req: NextApiRequest,
   res: NextApiResponse<Deployment[]>,
 ) {
-  const { app, env } = req.query
+  const { app, env, status } = req.query
   let updatedDeployments = deployments;
 
   if (app) {
-    updatedDeployments = updatedDeployments.filter((deployment) => deployment.app === app)
+    updatedDeployments = updatedDeployments.filter((deployment) => deployment.app === app);
   }
   if (env) {
-    updatedDeployments = updatedDeployments.filter((deployment) => deployment.env === env)
+    updatedDeployments = updatedDeployments.filter((deployment) => deployment.env === env);
+  }
+  if (status) {
+    updatedDeployments = updatedDeployments.filter((deployment) => deployment.status === status);
   }
 
   res.status(200).json(updatedDeployments);

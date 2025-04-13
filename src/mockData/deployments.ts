@@ -19,7 +19,7 @@ export const deployments = [
       "id": "3",
       "app": "Users",
       "env": "qa",
-      "status": "failed",
+      "status": "success",
       "timestamp": "2025-04-12T13:35:00Z",
       "triggeredBy": "Amanda"
     },
@@ -27,16 +27,16 @@ export const deployments = [
       "id": "4",
       "app": "Business",
       "env": "develop",
-      "status": "failed",
+      "status": "success",
       "timestamp": "2025-04-12T13:45:00Z",
-      "triggeredBy": "Bob"
+      "triggeredBy": "Kiki"
     },
     {
       "id": "5",
       "app": "Checkout",
       "env": "production",
-      "status": "failed",
-      "timestamp": "2025-04-12T13:30:00Z",
+      "status": "pending",
+      "timestamp": "2025-04-12T13:30:12Z",
       "triggeredBy": "Bob"
     },
   ]
