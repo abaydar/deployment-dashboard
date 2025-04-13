@@ -26,6 +26,11 @@ const Deployments = () => {
         env: [],
         status: [],
     });
+    const [appliedFilters, setAppliedFilters] = useState<Filters>({
+        app: [],
+        env: [],
+        status: [],
+    });
 
     const buildFiltersUrl = (filters: Filters) => {
         const queryString = new URLSearchParams();
@@ -34,14 +39,19 @@ const Deployments = () => {
             values.forEach((value: string) => queryString.append(key, value));
         });
 
-        return `/api/deployments/?${queryString}`;
+        return queryString;
+    }
+
+    const buildSearchUrl = (query: string) => {
+
     }
   
     useEffect(() => {
       const fetchData = async () => {
         try {
-            const hasFilters = Object.values(filters).some((arr) => arr.length > 0);
-            const url = hasFilters ? buildFiltersUrl(filters) : '/api/deployments'
+            const hasFilters = Object.values(appliedFilters).some((arr) => arr.length > 0);
+            let url = '/api/deployments'
+            url = hasFilters ? `${url}?${(buildFiltersUrl(appliedFilters))}` : url
             const response = await fetch(url);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -54,23 +64,32 @@ const Deployments = () => {
       }
 
       fetchData();
-    }, [filters]);
+    }, [appliedFilters]);
 
-    const handleFilterClick = () => setIsFilterClicked(!isFilterClicked);
+    const handleFilterClick = () => {
+        if (!isFilterClicked) {
+            setFilters(appliedFilters);
+        }
+        setIsFilterClicked(!isFilterClicked);
+    }
 
     const handleFilterChanges = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setAreFiltersApplied(true);
         setIsFilterClicked(false);
+        setAppliedFilters(filters);
     }
 
     const handleRemoveFilter = (type: keyof Filters, value: string) => {
-        const newValues = filters[type].filter(f => f !== value);
-        setFilters({...filters, [type]: newValues});
+        const newValues = appliedFilters[type].filter(f => f !== value);
+        const newAppliedFilters = {...appliedFilters, [type]: newValues}
+        
+        setAppliedFilters(newAppliedFilters);
 
-        if (Object.keys(filters).length === 0) {
-            setAreFiltersApplied(false);
-        }   
+        const isEmpty = Object.values(newAppliedFilters).every(arr => arr.length === 0);
+        if (isEmpty) {
+          setAreFiltersApplied(false);
+        }
     }
 
     const toggleCheckbox = (type: keyof Filters, value: string) => {
@@ -85,7 +104,8 @@ const Deployments = () => {
     const handleClearFilters = () => {
         setAreFiltersApplied(false);
         setIsFilterClicked(false);
-        setFilters({app: [], env: [], status: []});
+        setFilters({app: [], env: [], status: []})
+        setAppliedFilters({app: [], env: [], status: []});
     };
 
     const isChecked = (type: keyof Filters, value: string) => {
@@ -106,13 +126,13 @@ const Deployments = () => {
                     toggleCheckbox={toggleCheckbox}
                 />
             }
-            {!isFilterClicked && filters && Object.entries(filters).map(([key, values]) => (
+            {!isFilterClicked && appliedFilters && Object.entries(appliedFilters).map(([key, values]) => (
                 <>
-                    {values.length > 0 && values.map((value: string) => (
-                        <>
+                    {values.length > 0 && values.map((value: string, idx: number) => (
+                        <div key={`${value}-${idx}`}>
                             <div>{value}</div>
                             <button onClick={() => handleRemoveFilter(key as keyof Filters, value)}>x</button>
-                        </>
+                        </div>
                     ))}
                 </>
             

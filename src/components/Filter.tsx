@@ -15,10 +15,10 @@ export const Filter = ({ handleFilterChanges, isChecked, toggleCheckbox }: Filte
         <form onSubmit={handleFilterChanges}>
             <fieldset>
                 <legend>By App:</legend>
-                    {appNames.map((appName) => (    
+                    {appNames.map((appName, idx) => (    
                         <label>
                             <input
-                                key={appName}
+                                key={`${appName}-${idx}`}
                                 type='checkbox'
                                 value={appName}
                                 checked={isChecked("app", appName)}
@@ -30,10 +30,10 @@ export const Filter = ({ handleFilterChanges, isChecked, toggleCheckbox }: Filte
             </fieldset>
             <fieldset>
                 <legend>By Env:</legend>
-                    {envs.map((env) => (
+                    {envs.map((env, idx) => (
                             <label>
                                 <input
-                                    key={env}
+                                    key={`${env}-${idx}`}
                                     type='checkbox'
                                     value={env}
                                     checked={isChecked("env", env)}
@@ -45,10 +45,10 @@ export const Filter = ({ handleFilterChanges, isChecked, toggleCheckbox }: Filte
             </fieldset>
             <fieldset>
                 <legend>By Status:</legend>
-                    {statuses.map((status) => (
+                    {statuses.map((status, idx) => (
                         <label>
                             <input
-                                key={status}
+                                key={`${status}-${idx}`}
                                 type='checkbox'
                                 value={status}
                                 checked={isChecked("status", status)}
