@@ -12,6 +12,7 @@ interface Deployment {
 const Deployments = () => {
     const [deployments, setDeployments] = useState<Deployment[]>([])
     const [isFilterClicked, setIsFilterClicked] = useState<boolean>(false);
+    const [filtersApplied, setFiltersApplied] = useState<boolean>(false);
     const [appNameCheckedOptions, setAppNameCheckedOptions] = useState<string[]>([]);
     const [envCheckedOptions, setEnvCheckedOptions] = useState<string[]>([]);
 
@@ -21,9 +22,9 @@ const Deployments = () => {
         const data = await response.json();
         setDeployments(data);
       } catch (e) {
-        console.error(e)
+        console.error(e);
       }
-    }
+    };
     
     const getFilteredDeployments = async (params: { app?: string[]; env?: string[]; }) => {
         const queryString = new URLSearchParams();
@@ -32,15 +33,18 @@ const Deployments = () => {
           values.forEach((value) => queryString.append(key, value));
         });
 
-        console.log(params);
-        const response = await fetch(`/api/deployments?${queryString}`)
-        const data = await response.json();
-        setDeployments(data);
-    }
+        try {
+            const response = await fetch(`/api/deployments?${queryString}`)
+            const data = await response.json();
+            setDeployments(data);
+        } catch (e) {
+            console.error;
+        }
+    };
   
     useEffect(() => {
-      getDeployments()
-    }, [])
+      getDeployments();
+    }, []);
 
     const handleFilterClick = () => setIsFilterClicked(!isFilterClicked);
 
@@ -54,6 +58,7 @@ const Deployments = () => {
             checkedOptions = {...checkedOptions, env: envCheckedOptions}
         }
         getFilteredDeployments(checkedOptions);
+        setFiltersApplied(true);
     }
 
     const toggleCheckboxValue = (value: string, selected: string[], setSelected: Function) => {
@@ -66,10 +71,22 @@ const Deployments = () => {
 
     const handleAppNameCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         toggleCheckboxValue(e.target.value, appNameCheckedOptions, setAppNameCheckedOptions);
-    }
+    };
 
     const handleEnvCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         toggleCheckboxValue(e.target.value, envCheckedOptions, setEnvCheckedOptions);
+    };
+
+    const handleClearFilters = () => {
+        getDeployments();
+        setAppNameCheckedOptions([]);
+        setEnvCheckedOptions([]);
+        setFiltersApplied(false);
+    };
+
+    const isChecked = (value: string) => {
+        const filtersApplied = [...appNameCheckedOptions, ...envCheckedOptions];
+        return filtersApplied.includes(value);
     }
 
     const appNames = ['Payments', 'Checkout', 'Users', 'Business'];
@@ -93,6 +110,7 @@ const Deployments = () => {
                                     key={appName}
                                     type='checkbox'
                                     value={appName}
+                                    checked={isChecked(appName)}
                                     onChange={handleAppNameCheckboxChange}
                                 />
                                 {appName}
@@ -109,6 +127,7 @@ const Deployments = () => {
                                     key={env}
                                     type='checkbox'
                                     value={env}
+                                    checked={isChecked(env)}
                                     onChange={handleEnvCheckboxChange}
                                 />
                                     {env}
@@ -119,6 +138,7 @@ const Deployments = () => {
                     <button>Apply Changes</button>
                 </form>
             }
+            {filtersApplied && <button onClick={handleClearFilters}>Clear Filters</button>}
             <table>
             <thead>
             <tr>
