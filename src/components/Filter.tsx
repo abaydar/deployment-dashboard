@@ -1,12 +1,12 @@
+import { Filters } from "./Deployments";
+
 interface FilterProps {
     handleFilterChanges: (e: React.FormEvent<HTMLFormElement>) => void;
-    isChecked: (value: string) => boolean;
-    handleAppNameCheckboxChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    handleEnvCheckboxChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    handleStatusCheckboxChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    isChecked: (type: keyof Filters, value: string) => boolean;
+    toggleCheckbox: (type: keyof Filters, value: string) => void;
 }
 
-export const Filter = ({ handleFilterChanges, isChecked, handleAppNameCheckboxChange, handleEnvCheckboxChange, handleStatusCheckboxChange}: FilterProps) => {
+export const Filter = ({ handleFilterChanges, isChecked, toggleCheckbox }: FilterProps) => {
     const appNames = ['Payments', 'Checkout', 'Users', 'Business'];
     const envs = ['production', 'qa', 'develop'];
     const statuses = ['success', 'pending', 'failed'];
@@ -21,8 +21,8 @@ export const Filter = ({ handleFilterChanges, isChecked, handleAppNameCheckboxCh
                                 key={appName}
                                 type='checkbox'
                                 value={appName}
-                                checked={isChecked(appName)}
-                                onChange={handleAppNameCheckboxChange}
+                                checked={isChecked("app", appName)}
+                                onChange={() => toggleCheckbox("app", appName)}
                             />
                             {appName}
                         </label>
@@ -36,8 +36,8 @@ export const Filter = ({ handleFilterChanges, isChecked, handleAppNameCheckboxCh
                                     key={env}
                                     type='checkbox'
                                     value={env}
-                                    checked={isChecked(env)}
-                                    onChange={handleEnvCheckboxChange}
+                                    checked={isChecked("env", env)}
+                                    onChange={() => toggleCheckbox("env", env)}
                                 />
                                 {env}
                             </label>
@@ -51,8 +51,8 @@ export const Filter = ({ handleFilterChanges, isChecked, handleAppNameCheckboxCh
                                 key={status}
                                 type='checkbox'
                                 value={status}
-                                checked={isChecked(status)}
-                                onChange={handleStatusCheckboxChange}
+                                checked={isChecked("status", status)}
+                                onChange={() => toggleCheckbox("status", status)}
                             />
                             {status}
                         </label>

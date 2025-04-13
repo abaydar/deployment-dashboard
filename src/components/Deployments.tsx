@@ -10,15 +10,22 @@ export interface Deployment {
     triggeredBy: string;
 }
 
+export interface Filters {
+    app: string[];
+    env: string[];
+    status: string[];
+}
+
   
 const Deployments = () => {
     const [deployments, setDeployments] = useState<Deployment[]>([])
     const [isFilterClicked, setIsFilterClicked] = useState<boolean>(false);
     const [areFiltersApplied, setAreFiltersApplied] = useState<boolean>(false);
-    const [appNameCheckedOptions, setAppNameCheckedOptions] = useState<string[]>([]);
-    const [envCheckedOptions, setEnvCheckedOptions] = useState<string[]>([]);
-    const [statusCheckedOptions, setStatusCheckedOptions] = useState<string[]>([]);
-    const [filtersApplied, setFiltersApplied] = useState<string[]>([]);
+    const [filters, setFilters] = useState<Filters>({
+        app: [],
+        env: [],
+        status: [],
+    });
 
     const getDeployments = async () => {
       try {
@@ -30,11 +37,12 @@ const Deployments = () => {
       }
     };
     
-    const getFilteredDeployments = async (params: { app?: string[]; env?: string[]; status?: string[]}) => {
+    const getFilteredDeployments = async (filters: Filters) => {
         const queryString = new URLSearchParams();
-        console.log('params: ', params);
-        Object.entries(params).forEach(([key, values]) => {
-          values.forEach((value) => queryString.append(key, value));
+        
+        console.log(filters)
+        Object.entries(filters).forEach(([key, value]) => {
+            queryString.append(key, value)
         });
 
         try {
@@ -54,78 +62,41 @@ const Deployments = () => {
 
     const handleFilterChanges = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        let checkedOptions = {}
-        if (appNameCheckedOptions.length > 0) {
-            checkedOptions = {...checkedOptions, app: appNameCheckedOptions};
-        }
-        if (envCheckedOptions.length > 0) {
-            checkedOptions = {...checkedOptions, env: envCheckedOptions};
-        }
-        if (statusCheckedOptions.length > 0) {
-            checkedOptions = {...checkedOptions, status: statusCheckedOptions};
-        }
-        getFilteredDeployments(checkedOptions);
+        getFilteredDeployments(filters);
         setAreFiltersApplied(true);
-        setFiltersApplied([...appNameCheckedOptions, ...envCheckedOptions, ...statusCheckedOptions])
         setIsFilterClicked(false);
     }
 
-    const handleRemoveFilter = (filter: string) => {
-        const activeAppFilters = appNameCheckedOptions.filter(f => f !== filter);
-        const activeEnvFilters = envCheckedOptions.filter(f => f !== filter);
-        const activeStatusFilters = statusCheckedOptions.filter(f => f !== filter);
-        setAppNameCheckedOptions(activeAppFilters);
-        setEnvCheckedOptions(activeEnvFilters);
-        setStatusCheckedOptions(activeStatusFilters);
+    const handleRemoveFilter = (type: keyof Filters, value: string) => {
+        const newValues = filters[type].filter(f => f !== value);
+        setFilters({...filters, [type]: newValues});
 
-        getFilteredDeployments({
-            ...activeAppFilters && {app: activeAppFilters},
-            ...activeEnvFilters && {env: activeEnvFilters},
-            ...activeStatusFilters && {status: activeStatusFilters},
-        })
+        getFilteredDeployments(filters)
 
-        const updatedFilters = filtersApplied.filter(f => f !== filter);
-        setFiltersApplied(updatedFilters);
-
-        if (filtersApplied.length === 0) {
+        if (Object.keys(filters).length === 0) {
             setAreFiltersApplied(false);
         }
         
     }
 
-    const toggleCheckboxValue = (value: string, selected: string[], setSelected: Function) => {
-        if (selected.includes(value)) {
-            setSelected(selected.filter((val) => val !== value))
+    const toggleCheckbox = (type: keyof Filters, value: string) => {
+        if (filters[type].includes(value)){
+            const newValues = filters[type].filter(f => f !== value);
+            setFilters({...filters, [type]: newValues});
         } else {
-            setSelected([...selected, value])
+            setFilters({...filters, [type]: [...filters[type], value]});
         }
     };
 
-    const handleAppNameCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        toggleCheckboxValue(e.target.value, appNameCheckedOptions, setAppNameCheckedOptions);
-    };
-
-    const handleEnvCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        toggleCheckboxValue(e.target.value, envCheckedOptions, setEnvCheckedOptions);
-    };
-
-    const handleStatusCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        toggleCheckboxValue(e.target.value, statusCheckedOptions, setStatusCheckedOptions)
-    }
-
     const handleClearFilters = () => {
         getDeployments();
-        setAppNameCheckedOptions([]);
-        setEnvCheckedOptions([]);
-        setStatusCheckedOptions([]);
         setAreFiltersApplied(false);
         setIsFilterClicked(false);
-        setFiltersApplied([]);
+        setFilters({app: [], env: [], status: []});
     };
 
-    const isChecked = (value: string) => {
-        const filtersApplied = [...appNameCheckedOptions, ...envCheckedOptions, ...statusCheckedOptions];
-        return filtersApplied.includes(value);
+    const isChecked = (type: keyof Filters, value: string) => {
+        return filters[type].includes(value);
     }
 
     return (
@@ -139,16 +110,19 @@ const Deployments = () => {
                 <Filter
                     handleFilterChanges={handleFilterChanges}
                     isChecked={isChecked}
-                    handleAppNameCheckboxChange={handleAppNameCheckboxChange}
-                    handleEnvCheckboxChange={handleEnvCheckboxChange}
-                    handleStatusCheckboxChange={handleStatusCheckboxChange}
+                    toggleCheckbox={toggleCheckbox}
                 />
             }
-            {filtersApplied && filtersApplied.map((filterApplied) => (
+            {!isFilterClicked && filters && Object.entries(filters).map(([key, values]) => (
                 <>
-                    <div>{filterApplied}</div>
-                    <button onClick={() => handleRemoveFilter(filterApplied)}>x</button>
+                    {values.length > 0 && values.map((value: string) => (
+                        <>
+                            <div>{value}</div>
+                            <button onClick={() => handleRemoveFilter(key as keyof Filters, value)}>x</button>
+                        </>
+                    ))}
                 </>
+            
             ))}
             {areFiltersApplied && <button onClick={handleClearFilters}>Clear All Filters</button>}
             <DeploymentTable deployments={deployments} />
