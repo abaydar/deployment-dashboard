@@ -27,42 +27,39 @@ const Deployments = () => {
         status: [],
     });
 
-    const getDeployments = async () => {
-      try {
-        const response = await fetch('/api/deployments');
-        const data = await response.json();
-        setDeployments(data);
-      } catch (e) {
-        console.error(e);
-      }
-    };
-    
-    const getFilteredDeployments = async (filters: Filters) => {
+    const buildFiltersUrl = (filters: Filters) => {
         const queryString = new URLSearchParams();
         
-        console.log(filters)
-        Object.entries(filters).forEach(([key, value]) => {
-            queryString.append(key, value)
+        Object.entries(filters).forEach(([key, values]) => {
+            values.forEach((value: string) => queryString.append(key, value));
         });
 
+        return `/api/deployments/?${queryString}`;
+    }
+  
+    useEffect(() => {
+      const fetchData = async () => {
         try {
-            const response = await fetch(`/api/deployments?${queryString}`)
+            const hasFilters = Object.values(filters).some((arr) => arr.length > 0);
+            const url = hasFilters ? buildFiltersUrl(filters) : '/api/deployments'
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
             const data = await response.json();
             setDeployments(data);
         } catch (e) {
-            console.error;
+            console.error(e)
         }
-    };
-  
-    useEffect(() => {
-      getDeployments();
-    }, []);
+      }
+
+      fetchData();
+    }, [filters]);
 
     const handleFilterClick = () => setIsFilterClicked(!isFilterClicked);
 
     const handleFilterChanges = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        getFilteredDeployments(filters);
         setAreFiltersApplied(true);
         setIsFilterClicked(false);
     }
@@ -71,12 +68,9 @@ const Deployments = () => {
         const newValues = filters[type].filter(f => f !== value);
         setFilters({...filters, [type]: newValues});
 
-        getFilteredDeployments(filters)
-
         if (Object.keys(filters).length === 0) {
             setAreFiltersApplied(false);
-        }
-        
+        }   
     }
 
     const toggleCheckbox = (type: keyof Filters, value: string) => {
@@ -89,7 +83,6 @@ const Deployments = () => {
     };
 
     const handleClearFilters = () => {
-        getDeployments();
         setAreFiltersApplied(false);
         setIsFilterClicked(false);
         setFilters({app: [], env: [], status: []});
