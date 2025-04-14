@@ -21,6 +21,7 @@ const Deployments = () => {
     const [deployments, setDeployments] = useState<Deployment[]>([])
     const [isFilterClicked, setIsFilterClicked] = useState<boolean>(false);
     const [areFiltersApplied, setAreFiltersApplied] = useState<boolean>(false);
+    const [searchQuery, setSearchQuery] = useState<string>('');
     const [filters, setFilters] = useState<Filters>({
         app: [],
         env: [],
@@ -32,27 +33,33 @@ const Deployments = () => {
         status: [],
     });
 
-    const buildFiltersUrl = (filters: Filters) => {
+    const buildFiltersUrl = (filters: Filters, query: string) => {
         const queryString = new URLSearchParams();
         
         Object.entries(filters).forEach(([key, values]) => {
             values.forEach((value: string) => queryString.append(key, value));
         });
 
+        if (searchQuery !== '') {
+            queryString.append('searchQuery', query);
+        };
+
         return queryString;
-    }
-
-    const buildSearchUrl = (query: string) => {
-
     }
   
     useEffect(() => {
       const fetchData = async () => {
         try {
             const hasFilters = Object.values(appliedFilters).some((arr) => arr.length > 0);
+            const hasSearch = searchQuery !== '';
             let url = '/api/deployments'
-            url = hasFilters ? `${url}?${(buildFiltersUrl(appliedFilters))}` : url
+
+            if (hasFilters || hasSearch) {
+                url = `${url}?${(buildFiltersUrl(appliedFilters, searchQuery))}`;
+            }
+
             const response = await fetch(url);
+            
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
               }
@@ -64,7 +71,7 @@ const Deployments = () => {
       }
 
       fetchData();
-    }, [appliedFilters]);
+    }, [appliedFilters, searchQuery]);
 
     const handleFilterClick = () => {
         if (!isFilterClicked) {
@@ -112,6 +119,10 @@ const Deployments = () => {
         return filters[type].includes(value);
     }
 
+    const handleSearchQuery = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchQuery(e.target.value);
+    };
+
     return (
         <>
             <button
@@ -137,6 +148,7 @@ const Deployments = () => {
                 </>
             
             ))}
+            <label>Search by app: </label><input placeholder="Search..." onChange={handleSearchQuery}/>
             {areFiltersApplied && <button onClick={handleClearFilters}>Clear All Filters</button>}
             <DeploymentTable deployments={deployments} />
         </>

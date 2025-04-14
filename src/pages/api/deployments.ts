@@ -13,7 +13,7 @@ export default function handler(
   req: NextApiRequest,
   res: NextApiResponse<Deployment[]>,
 ) {
-  const { app, env, status } = req.query
+  const { app, env, status, searchQuery } = req.query
   let updatedDeployments = deployments;
 
   if (app) {
@@ -24,6 +24,13 @@ export default function handler(
   }
   if (status) {
     updatedDeployments = updatedDeployments.filter((deployment) => deployment.status === status);
+  }
+  if (searchQuery) {
+    const search = Array.isArray(searchQuery) ? searchQuery[0] : searchQuery;
+    console.log(search);
+    updatedDeployments = updatedDeployments.filter((deployment) =>
+      deployment.app.toLowerCase().includes(search.toLowerCase())
+    );
   }
 
   res.status(200).json(updatedDeployments);
