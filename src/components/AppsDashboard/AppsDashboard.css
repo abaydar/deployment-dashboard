@@ -1,0 +1,10 @@
+.apps-table {
+    margin: auto;
+    border-collapse: collapse;
+    width: 100%;
+    max-width: 745px;
+}
+
+.apps-header {
+    text-align: left;
+}
