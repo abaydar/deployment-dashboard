@@ -7,7 +7,6 @@ export async function getServerSideProps() {
         return { props: { apps }  }
     } catch (e) {
         console.error(e)
-
         return {
             props: {
                 apps: [],
